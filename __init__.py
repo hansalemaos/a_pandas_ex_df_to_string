@@ -3,6 +3,16 @@ from typing import Union
 import pandas as pd
 from pandas.core.base import PandasObject
 
+def _conv_col(column):
+    try:
+        return column.astype("string")
+    except Exception:
+        try:
+            return column.apply(lambda x: x.decode('utf-8', 'replace') if not isinstance(x, str) else str(x)).astype(
+            "string")
+        except Exception:
+            return column.apply(lambda x: x.decode('utf-8', 'replace')).astype(
+            "string")
 
 def ds_to_string(df: Union[pd.DataFrame, pd.Series]) -> Union[pd.Series, pd.DataFrame]:
     """
@@ -36,16 +46,19 @@ def ds_to_string(df: Union[pd.DataFrame, pd.Series]) -> Union[pd.Series, pd.Data
                     df2[col] = df2[col].fillna(nastring)
                 except Exception:
                     pass
-                df2[col] = df2[col].astype("string")
+                df2[col] = _conv_col(df2[col])
     else:
         try:
             df2 = df2.fillna(nastring)
         except Exception:
             pass
-        df2 = df2.astype("string")
+        df2 = _conv_col(df2)
     df2 = df2.fillna(nastring).copy()
     return df2
 
 
 def pd_add_to_string():
     PandasObject.ds_to_string = ds_to_string
+
+
+
