@@ -3,18 +3,18 @@ from typing import Union
 import pandas as pd
 from pandas.core.base import PandasObject
 
-def _conv_col(column):
+def _conv_col(column,errors='ignore'):
     try:
         return column.astype("string")
     except Exception:
         try:
-            return column.apply(lambda x: x.decode('utf-8', 'replace') if not isinstance(x, str) else str(x)).astype(
+            return column.apply(lambda x: x.decode('utf-8', errors) if not isinstance(x, str) else str(x)).astype(
             "string")
         except Exception:
-            return column.apply(lambda x: x.decode('utf-8', 'replace')).astype(
+            return column.apply(lambda x: x.decode('utf-8', errors)).astype(
             "string")
 
-def ds_to_string(df: Union[pd.DataFrame, pd.Series]) -> Union[pd.Series, pd.DataFrame]:
+def ds_to_string(df: Union[pd.DataFrame, pd.Series],errors='ignore') -> Union[pd.Series, pd.DataFrame]:
     """
     Example:
     from random import choice
@@ -46,13 +46,13 @@ def ds_to_string(df: Union[pd.DataFrame, pd.Series]) -> Union[pd.Series, pd.Data
                     df2[col] = df2[col].fillna(nastring)
                 except Exception:
                     pass
-                df2[col] = _conv_col(df2[col])
+                df2[col] = _conv_col(df2[col],errors=errors)
     else:
         try:
             df2 = df2.fillna(nastring)
         except Exception:
             pass
-        df2 = _conv_col(df2)
+        df2 = _conv_col(df2,errors=errors)
     df2 = df2.fillna(nastring).copy()
     return df2
 
